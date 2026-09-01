@@ -38,7 +38,7 @@ func BindTableKeys(
 			}
 
 			switch *selectedResource {
-
+			// Json Viewer For EC2
 			case "EC2":
 
 				index := row - 1
@@ -49,7 +49,12 @@ func BindTableKeys(
 				}
 
 				instance := state.EC2Instances[index]
-
+				ShowLoading(
+					app,
+					pages,
+					table,
+					instance.Name,
+				)
 				go func() {
 
 					detail := aws.GetEC2Detail(
@@ -82,7 +87,7 @@ func BindTableKeys(
 				}()
 
 				return nil
-
+			// Json Viewer For S3
 			case "S3":
 
 				index := row - 1
@@ -93,7 +98,12 @@ func BindTableKeys(
 				}
 
 				bucket := state.S3Buckets[index]
-
+				ShowLoading(
+					app,
+					pages,
+					table,
+					bucket.Name,
+				)
 				go func() {
 
 					detail := aws.GetS3BucketDetail(
@@ -126,84 +136,73 @@ func BindTableKeys(
 			}
 
 		// ==========================================
-		// ENTER - S3 DETAIL
+		// DETAIL
 		// ==========================================
 
-		case event.Key() == tcell.KeyEnter:
-
-			if *selectedResource != "S3" {
-				return nil
-			}
-
+		case event.Rune() == 'd':
 			if row <= 0 {
 				return nil
 			}
+			switch *selectedResource {
+			case "S3":
+				index := row - 1
 
-			index := row - 1
-
-			if index < 0 ||
-				index >= len(state.S3Buckets) {
-				return nil
-			}
-
-			bucket := state.S3Buckets[index]
-
-			// ======================================
-			// SHOW LOADING IMMEDIATELY
-			// ======================================
-
-			ShowLoading(
-				app,
-				pages,
-				table,
-				bucket.Name,
-			)
-
-			// ======================================
-			// BACKGROUND - BUCKET METADATA
-			// ======================================
-
-			go func() {
-
-				detail := aws.GetS3BucketDetail(
-					context.Background(),
-					*selectedProfile,
-					*selectedRegion,
+				if index < 0 ||
+					index >= len(state.S3Buckets) {
+					return nil
+				}
+				bucket := state.S3Buckets[index]
+				ShowLoading(
+					app,
+					pages,
+					table,
 					bucket.Name,
 				)
+				// ======================================
+				// BACKGROUND - BUCKET METADATA
+				// ======================================
+				go func() {
 
-				if detail == nil {
+					detail := aws.GetS3BucketDetail(
+						context.Background(),
+						*selectedProfile,
+						*selectedRegion,
+						bucket.Name,
+					)
+
+					if detail == nil {
+
+						app.QueueUpdateDraw(func() {
+
+							pages.RemovePage("loading")
+							app.SetFocus(table)
+						})
+
+						return
+					}
+
+					detail.CreationDate =
+						bucket.CreationDate
+
+					// ==================================
+					// SHOW DETAIL UI
+					// ==================================
 
 					app.QueueUpdateDraw(func() {
 
 						pages.RemovePage("loading")
-						app.SetFocus(table)
+
+						ShowS3Detail(
+							app,
+							pages,
+							table,
+							*selectedProfile,
+							detail,
+						)
 					})
 
-					return
-				}
-
-				detail.CreationDate =
-					bucket.CreationDate
-
-				// ==================================
-				// SHOW DETAIL UI
-				// ==================================
-
-				app.QueueUpdateDraw(func() {
-
-					pages.RemovePage("loading")
-
-					ShowS3Detail(
-						app,
-						pages,
-						table,
-						*selectedProfile,
-						detail,
-					)
-				})
-
-			}()
+				}()
+			}
 
 			return nil
 		}
