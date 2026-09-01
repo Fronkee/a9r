@@ -4,13 +4,12 @@ A fast terminal UI for managing AWS resources.
 
 ## Features
 
-- EC2 instance viewer
-- S3 bucket viewer
-- Resource Json viewer
+- EC2 instance detail/json viewer
+- S3 bucket detail/json viewer
 - Live search filtering
 - Auto refresh
 - Vim-style navigation
-- AWS profile support
+- AWS multi profile support
 - Multi-region support
 - Responsive terminal UI
 
@@ -43,6 +42,7 @@ go run .
 |-----|--------|
 | TAB | switch focus |
 | j | json |
+| d | detail |
 | / | search |
 | r | refresh |
 | a | auto refresh |
@@ -57,7 +57,6 @@ ui/
 
 ## Future Roadmap
 
-- S3
 - IAM
 - VPC
 - EKS
