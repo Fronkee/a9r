@@ -1,6 +1,6 @@
 package configs
 
-func Getregion() []string {
+func GetRegions() []string {
 	return []string{
 		"af-south-1",
 		"ap-east-1",

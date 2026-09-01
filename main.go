@@ -10,7 +10,8 @@ import (
 func main() {
 
 	profiles := configs.Loadconfig()
-	regions := configs.Getregion()
+	regions := configs.GetRegions()
+	resources := configs.GetResources()
 
 	app := tview.NewApplication()
 
@@ -29,10 +30,6 @@ func main() {
 	statusBar.SetBorder(true)
 	statusBar.SetTitle("Help")
 
-	/*statusBar.SetText(
-		"TAB=switch | J=json | /=search | r=refresh | a=auto | q=quit",
-	)*/
-
 	leftPanel,
 		profileDropDown,
 		regionDropDown,
@@ -42,6 +39,7 @@ func main() {
 		table,
 		profiles,
 		regions,
+		resources,
 		&selectedProfile,
 		&selectedRegion,
 		&selectedResource,
