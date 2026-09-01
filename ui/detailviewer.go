@@ -7,12 +7,639 @@ import (
 
 	"github.com/aungshanbo/a9r/aws"
 	"github.com/aungshanbo/a9r/models"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"github.com/aungshanbo/a9r/utils"
 )
+
 func ShowEC2Detail(
-	
-)
+	app *tview.Application,
+	pages *tview.Pages,
+	table *tview.Table,
+	title string,
+	instance *types.Instance,
+) {
+	if instance == nil {
+		return
+	}
+
+	text := tview.NewTextView()
+
+	text.SetBorder(true)
+	text.SetTitle(" EC2 Detail ")
+	text.SetDynamicColors(true)
+	text.SetScrollable(true)
+	text.SetWordWrap(false)
+
+	var builder strings.Builder
+
+	// ==================================================
+	// BASIC INFORMATION
+	// ==================================================
+
+	builder.WriteString("[yellow]BASIC INFORMATION[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	fmt.Fprintf(
+		&builder,
+		"Instance ID        : %s\n",
+		utils.stringValue(instance.InstanceId),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Name               : %s\n",
+		getEC2Tag(instance.Tags, "Name"),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Instance Type      : %s\n",
+		string(instance.InstanceType),
+	)
+
+	if instance.State != nil {
+		fmt.Fprintf(
+			&builder,
+			"State              : %s\n",
+			string(instance.State.Name),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"State Code         : %d\n",
+			helper.int32Value(instance.State.Code),
+		)
+	} else {
+		builder.WriteString("State              : -\n")
+		builder.WriteString("State Code         : -\n")
+	}
+
+	if instance.StateReason != nil {
+		fmt.Fprintf(
+			&builder,
+			"State Reason       : %s\n",
+			utils.stringValue(instance.StateReason.Message),
+		)
+	} else {
+		builder.WriteString("State Reason       : -\n")
+	}
+
+	fmt.Fprintf(
+		&builder,
+		"AMI                : %s\n",
+		utils.stringValue(instance.ImageId),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Architecture       : %s\n",
+		string(instance.Architecture),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Platform           : %s\n",
+		string(instance.Platform),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Platform Details   : %s\n",
+		utils.stringValue(instance.PlatformDetails),
+	)
+
+	if instance.LaunchTime != nil {
+		fmt.Fprintf(
+			&builder,
+			"Launch Time        : %s\n",
+			instance.LaunchTime.Format("2006-01-02 15:04:05 MST"),
+		)
+	} else {
+		builder.WriteString("Launch Time        : -\n")
+	}
+
+	// ==================================================
+	// COMPUTE
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]COMPUTE[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if instance.CpuOptions != nil {
+		fmt.Fprintf(
+			&builder,
+			"CPU Core Count     : %d\n",
+			int32Value(instance.CpuOptions.CoreCount),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"Threads / Core     : %d\n",
+			int32Value(instance.CpuOptions.ThreadsPerCore),
+		)
+	} else {
+		builder.WriteString("CPU Core Count     : -\n")
+		builder.WriteString("Threads / Core     : -\n")
+	}
+
+	fmt.Fprintf(
+		&builder,
+		"Hypervisor         : %s\n",
+		string(instance.Hypervisor),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"ENA Support        : %t\n",
+		boolValue(instance.EnaSupport),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"EBS Optimized      : %t\n",
+		boolValue(instance.EbsOptimized),
+	)
+
+	// ==================================================
+	// NETWORK
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]NETWORK[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	fmt.Fprintf(
+		&builder,
+		"Private IP         : %s\n",
+		utils.stringValue(instance.PrivateIpAddress),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Public IP          : %s\n",
+		utils.stringValue(instance.PublicIpAddress),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Private DNS        : %s\n",
+		utils.stringValue(instance.PrivateDnsName),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Public DNS         : %s\n",
+		utils.stringValue(instance.PublicDnsName),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"VPC ID             : %s\n",
+		utils.stringValue(instance.VpcId),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Subnet ID          : %s\n",
+		utils.stringValue(instance.SubnetId),
+	)
+
+	if instance.Placement != nil {
+		fmt.Fprintf(
+			&builder,
+			"Availability Zone  : %s\n",
+			utils.stringValue(instance.Placement.AvailabilityZone),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"AZ ID              : %s\n",
+			utils.stringValue(instance.Placement.AvailabilityZoneId),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"Tenancy            : %s\n",
+			string(instance.Placement.Tenancy),
+		)
+	} else {
+		builder.WriteString("Availability Zone  : -\n")
+		builder.WriteString("AZ ID              : -\n")
+		builder.WriteString("Tenancy            : -\n")
+	}
+
+	// ==================================================
+	// IPV6
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]IPv6 ADDRESSES[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if instance.Ipv6Address == nil {
+		builder.WriteString("  -\n")
+	} else {
+		fmt.Fprintf(
+			&builder,
+			"  %s\n",
+			utils.stringValue(instance.Ipv6Address),
+		)
+	}
+
+	// ==================================================
+	// SECURITY
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]SECURITY[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	fmt.Fprintf(
+		&builder,
+		"Key Name           : %s\n",
+		utils.stringValue(instance.KeyName),
+	)
+
+	if instance.IamInstanceProfile != nil {
+		fmt.Fprintf(
+			&builder,
+			"IAM Profile        : %s\n",
+			utils.stringValue(instance.IamInstanceProfile.Arn),
+		)
+	} else {
+		builder.WriteString("IAM Profile        : -\n")
+	}
+
+	// ==================================================
+	// SECURITY GROUPS
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]SECURITY GROUPS[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if len(instance.SecurityGroups) == 0 {
+		builder.WriteString("  -\n")
+	} else {
+		for _, sg := range instance.SecurityGroups {
+			fmt.Fprintf(
+				&builder,
+				"  %-25s %s\n",
+				utils.stringValue(sg.GroupName),
+				utils.stringValue(sg.GroupId),
+			)
+		}
+	}
+
+	// ==================================================
+	// NETWORK INTERFACES
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]NETWORK INTERFACES[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if len(instance.NetworkInterfaces) == 0 {
+		builder.WriteString("  -\n")
+	} else {
+
+		for i, ni := range instance.NetworkInterfaces {
+
+			fmt.Fprintf(
+				&builder,
+				"\n  Interface #%d\n",
+				i+1,
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    ID             : %s\n",
+				utils.stringValue(ni.NetworkInterfaceId),
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    Description    : %s\n",
+				utils.stringValue(ni.Description),
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    Status         : %s\n",
+				string(ni.Status),
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    MAC Address    : %s\n",
+				utils.stringValue(ni.MacAddress),
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    Private DNS    : %s\n",
+				utils.stringValue(ni.PrivateDnsName),
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    VPC ID         : %s\n",
+				utils.stringValue(ni.VpcId),
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    Subnet ID      : %s\n",
+				utils.stringValue(ni.SubnetId),
+			)
+
+			if len(ni.PrivateIpAddresses) > 0 {
+				builder.WriteString("    Private IPs     :\n")
+
+				for _, ip := range ni.PrivateIpAddresses {
+					fmt.Fprintf(
+						&builder,
+						"      - %s\n",
+						utils.stringValue(ip.PrivateIpAddress),
+					)
+				}
+			}
+		}
+	}
+
+	// ==================================================
+	// STORAGE
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]STORAGE[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if instance.RootDeviceName != nil {
+		fmt.Fprintf(
+			&builder,
+			"Root Device       : %s\n",
+			utils.stringValue(instance.RootDeviceName),
+		)
+	} else {
+		builder.WriteString("Root Device       : -\n")
+	}
+
+	fmt.Fprintf(
+		&builder,
+		"Root Device Type  : %s\n",
+		string(instance.RootDeviceType),
+	)
+
+	if len(instance.BlockDeviceMappings) == 0 {
+		builder.WriteString("\nBlock Devices     : -\n")
+	} else {
+
+		builder.WriteString("\nBlock Devices:\n")
+
+		for i, device := range instance.BlockDeviceMappings {
+
+			fmt.Fprintf(
+				&builder,
+				"\n  Device #%d\n",
+				i+1,
+			)
+
+			fmt.Fprintf(
+				&builder,
+				"    Device Name    : %s\n",
+				utils.stringValue(device.DeviceName),
+			)
+
+			if device.Ebs != nil {
+
+				fmt.Fprintf(
+					&builder,
+					"    Volume ID      : %s\n",
+					utils.stringValue(device.Ebs.VolumeId),
+				)
+
+				fmt.Fprintf(
+					&builder,
+					"    Delete on Term.: %t\n",
+					boolValue(device.Ebs.DeleteOnTermination),
+				)
+
+			}
+		}
+	}
+
+	// ==================================================
+	// PLACEMENT
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]PLACEMENT[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if instance.Placement != nil {
+
+		fmt.Fprintf(
+			&builder,
+			"Availability Zone : %s\n",
+			utils.stringValue(instance.Placement.AvailabilityZone),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"AZ ID             : %s\n",
+			utils.stringValue(instance.Placement.AvailabilityZoneId),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"Tenancy           : %s\n",
+			string(instance.Placement.Tenancy),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"Host ID           : %s\n",
+			utils.stringValue(instance.Placement.HostId),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"Partition Number  : %d\n",
+			int32Value(instance.Placement.PartitionNumber),
+		)
+
+		if instance.Placement.GroupName != nil {
+			fmt.Fprintf(
+				&builder,
+				"Placement Group   : %s\n",
+				utils.stringValue(instance.Placement.GroupName),
+			)
+		}
+	}
+
+	// ==================================================
+	// MONITORING
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]MONITORING[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	fmt.Fprintf(
+		&builder,
+		"Monitoring        : %s\n",
+		string(instance.Monitoring.State),
+	)
+
+	// ==================================================
+	// LIFECYCLE
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]LIFECYCLE[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	fmt.Fprintf(
+		&builder,
+		"Lifecycle         : %s\n",
+		string(instance.InstanceLifecycle),
+	)
+
+	fmt.Fprintf(
+		&builder,
+		"Spot Request ID   : %s\n",
+		utils.stringValue(instance.SpotInstanceRequestId),
+	)
+
+	// ==================================================
+	// METADATA
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]INSTANCE METADATA[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if instance.MetadataOptions != nil {
+
+		fmt.Fprintf(
+			&builder,
+			"HTTP Endpoint     : %s\n",
+			string(instance.MetadataOptions.HttpEndpoint),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"HTTP Tokens       : %s\n",
+			string(instance.MetadataOptions.HttpTokens),
+		)
+
+		fmt.Fprintf(
+			&builder,
+			"Hop Limit         : %d\n",
+			int32Value(instance.MetadataOptions.HttpPutResponseHopLimit),
+		)
+	}
+
+	// ==================================================
+	// TAGS
+	// ==================================================
+
+	builder.WriteString("\n")
+	builder.WriteString("[yellow]TAGS[white]\n")
+	builder.WriteString(strings.Repeat("─", 70))
+	builder.WriteString("\n")
+
+	if len(instance.Tags) == 0 {
+		builder.WriteString("  -\n")
+	} else {
+
+		for _, tag := range instance.Tags {
+
+			fmt.Fprintf(
+				&builder,
+				"  %-25s : %s\n",
+				utils.stringValue(tag.Key),
+				utils.stringValue(tag.Value),
+			)
+		}
+	}
+
+	// ==================================================
+	// DISPLAY
+	// ==================================================
+
+	text.SetText(builder.String())
+
+	// ==================================================
+	// KEY HANDLING
+	// ==================================================
+
+	text.SetInputCapture(
+		func(event *tcell.EventKey) *tcell.EventKey {
+
+			switch event.Key() {
+
+			case tcell.KeyEscape:
+
+				pages.RemovePage("ec2-detail")
+				app.SetFocus(table)
+
+				return nil
+			}
+
+			return event
+		},
+	)
+
+	// ==================================================
+	// SHOW
+	// ==================================================
+
+	pages.AddPage(
+		"ec2-detail",
+		text,
+		true,
+		true,
+	)
+
+	app.SetFocus(text)
+}
+
+// ======================================================
+// GET EC2 TAG
+// ======================================================
+
+func getEC2Tag(
+	tags []types.Tag,
+	key string,
+) string {
+
+	for _, tag := range tags {
+
+		if utils.stringValue(tag.Key) == key {
+			return utils.stringValue(tag.Value)
+		}
+	}
+
+	return "-"
+}
+
 func ShowS3Detail(
 	app *tview.Application,
 	pages *tview.Pages,

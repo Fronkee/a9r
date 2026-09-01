@@ -75,7 +75,7 @@ func BindTableKeys(
 					}
 
 					app.QueueUpdateDraw(func() {
-
+						pages.RemovePage("loading")
 						ShowJSONViewer(
 							app,
 							pages,
@@ -121,7 +121,7 @@ func BindTableKeys(
 						bucket.CreationDate
 
 					app.QueueUpdateDraw(func() {
-
+						pages.RemovePage("loading")
 						ShowJSONViewer(
 							app,
 							pages,
@@ -136,7 +136,7 @@ func BindTableKeys(
 			}
 
 		// ==========================================
-		// DETAIL
+		// DETAIL Viewer
 		// ==========================================
 
 		case event.Rune() == 'd':
@@ -144,6 +144,53 @@ func BindTableKeys(
 				return nil
 			}
 			switch *selectedResource {
+			case "EC2":
+				index := row - 1
+
+				if index < 0 ||
+					index >= len(state.EC2Instances) {
+					return nil
+				}
+				instance := state.EC2Instances[index]
+				ShowLoading(
+					app,
+					pages,
+					table,
+					instance.ID,
+				)
+				// ======================================
+				// BACKGROUND - Instance METADATA
+				// ======================================
+				go func() {
+					detail := aws.GetEC2Detail(
+						context.Background(),
+						*selectedProfile,
+						*selectedRegion,
+						instance.ID,
+					)
+
+					if detail == nil {
+						app.QueueUpdateDraw(func() {
+							pages.RemovePage("loading")
+							app.SetFocus(table)
+						})
+
+						return
+					}
+
+					app.QueueUpdateDraw(func() {
+						pages.RemovePage("loading")
+						ShowEC2Detail(
+							app,
+							pages,
+							table,
+							*selectedProfile,
+							detail,
+						)
+					})
+				}()
+
+				return nil
 			case "S3":
 				index := row - 1
 
@@ -181,8 +228,7 @@ func BindTableKeys(
 						return
 					}
 
-					detail.CreationDate =
-						bucket.CreationDate
+					detail.CreationDate = bucket.CreationDate
 
 					// ==================================
 					// SHOW DETAIL UI
