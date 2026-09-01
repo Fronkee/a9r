@@ -7,10 +7,10 @@ import (
 
 	"github.com/aungshanbo/a9r/aws"
 	"github.com/aungshanbo/a9r/models"
+	"github.com/aungshanbo/a9r/utils"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"github.com/aungshanbo/a9r/utils"
 )
 
 func ShowEC2Detail(
@@ -45,7 +45,7 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"Instance ID        : %s\n",
-		utils.stringValue(instance.InstanceId),
+		utils.Stringvalue(instance.InstanceId),
 	)
 
 	fmt.Fprintf(
@@ -70,7 +70,7 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"State Code         : %d\n",
-			helper.int32Value(instance.State.Code),
+			utils.Int32value(instance.State.Code),
 		)
 	} else {
 		builder.WriteString("State              : -\n")
@@ -81,7 +81,7 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"State Reason       : %s\n",
-			utils.stringValue(instance.StateReason.Message),
+			utils.Stringvalue(instance.StateReason.Message),
 		)
 	} else {
 		builder.WriteString("State Reason       : -\n")
@@ -90,7 +90,7 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"AMI                : %s\n",
-		utils.stringValue(instance.ImageId),
+		utils.Stringvalue(instance.ImageId),
 	)
 
 	fmt.Fprintf(
@@ -108,7 +108,7 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"Platform Details   : %s\n",
-		utils.stringValue(instance.PlatformDetails),
+		utils.Stringvalue(instance.PlatformDetails),
 	)
 
 	if instance.LaunchTime != nil {
@@ -134,13 +134,13 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"CPU Core Count     : %d\n",
-			int32Value(instance.CpuOptions.CoreCount),
+			utils.Int32value(instance.CpuOptions.CoreCount),
 		)
 
 		fmt.Fprintf(
 			&builder,
 			"Threads / Core     : %d\n",
-			int32Value(instance.CpuOptions.ThreadsPerCore),
+			utils.Int32value(instance.CpuOptions.ThreadsPerCore),
 		)
 	} else {
 		builder.WriteString("CPU Core Count     : -\n")
@@ -156,13 +156,13 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"ENA Support        : %t\n",
-		boolValue(instance.EnaSupport),
+		utils.BoolValue(instance.EnaSupport),
 	)
 
 	fmt.Fprintf(
 		&builder,
 		"EBS Optimized      : %t\n",
-		boolValue(instance.EbsOptimized),
+		utils.BoolValue(instance.EbsOptimized),
 	)
 
 	// ==================================================
@@ -177,50 +177,50 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"Private IP         : %s\n",
-		utils.stringValue(instance.PrivateIpAddress),
+		utils.Stringvalue(instance.PrivateIpAddress),
 	)
 
 	fmt.Fprintf(
 		&builder,
 		"Public IP          : %s\n",
-		utils.stringValue(instance.PublicIpAddress),
+		utils.Stringvalue(instance.PublicIpAddress),
 	)
 
 	fmt.Fprintf(
 		&builder,
 		"Private DNS        : %s\n",
-		utils.stringValue(instance.PrivateDnsName),
+		utils.Stringvalue(instance.PrivateDnsName),
 	)
 
 	fmt.Fprintf(
 		&builder,
 		"Public DNS         : %s\n",
-		utils.stringValue(instance.PublicDnsName),
+		utils.Stringvalue(instance.PublicDnsName),
 	)
 
 	fmt.Fprintf(
 		&builder,
 		"VPC ID             : %s\n",
-		utils.stringValue(instance.VpcId),
+		utils.Stringvalue(instance.VpcId),
 	)
 
 	fmt.Fprintf(
 		&builder,
 		"Subnet ID          : %s\n",
-		utils.stringValue(instance.SubnetId),
+		utils.Stringvalue(instance.SubnetId),
 	)
 
 	if instance.Placement != nil {
 		fmt.Fprintf(
 			&builder,
 			"Availability Zone  : %s\n",
-			utils.stringValue(instance.Placement.AvailabilityZone),
+			utils.Stringvalue(instance.Placement.AvailabilityZone),
 		)
 
 		fmt.Fprintf(
 			&builder,
 			"AZ ID              : %s\n",
-			utils.stringValue(instance.Placement.AvailabilityZoneId),
+			utils.Stringvalue(instance.Placement.AvailabilityZoneId),
 		)
 
 		fmt.Fprintf(
@@ -249,7 +249,7 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"  %s\n",
-			utils.stringValue(instance.Ipv6Address),
+			utils.Stringvalue(instance.Ipv6Address),
 		)
 	}
 
@@ -265,14 +265,14 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"Key Name           : %s\n",
-		utils.stringValue(instance.KeyName),
+		utils.Stringvalue(instance.KeyName),
 	)
 
 	if instance.IamInstanceProfile != nil {
 		fmt.Fprintf(
 			&builder,
 			"IAM Profile        : %s\n",
-			utils.stringValue(instance.IamInstanceProfile.Arn),
+			utils.Stringvalue(instance.IamInstanceProfile.Arn),
 		)
 	} else {
 		builder.WriteString("IAM Profile        : -\n")
@@ -294,8 +294,8 @@ func ShowEC2Detail(
 			fmt.Fprintf(
 				&builder,
 				"  %-25s %s\n",
-				utils.stringValue(sg.GroupName),
-				utils.stringValue(sg.GroupId),
+				utils.Stringvalue(sg.GroupName),
+				utils.Stringvalue(sg.GroupId),
 			)
 		}
 	}
@@ -324,13 +324,13 @@ func ShowEC2Detail(
 			fmt.Fprintf(
 				&builder,
 				"    ID             : %s\n",
-				utils.stringValue(ni.NetworkInterfaceId),
+				utils.Stringvalue(ni.NetworkInterfaceId),
 			)
 
 			fmt.Fprintf(
 				&builder,
 				"    Description    : %s\n",
-				utils.stringValue(ni.Description),
+				utils.Stringvalue(ni.Description),
 			)
 
 			fmt.Fprintf(
@@ -342,25 +342,25 @@ func ShowEC2Detail(
 			fmt.Fprintf(
 				&builder,
 				"    MAC Address    : %s\n",
-				utils.stringValue(ni.MacAddress),
+				utils.Stringvalue(ni.MacAddress),
 			)
 
 			fmt.Fprintf(
 				&builder,
 				"    Private DNS    : %s\n",
-				utils.stringValue(ni.PrivateDnsName),
+				utils.Stringvalue(ni.PrivateDnsName),
 			)
 
 			fmt.Fprintf(
 				&builder,
 				"    VPC ID         : %s\n",
-				utils.stringValue(ni.VpcId),
+				utils.Stringvalue(ni.VpcId),
 			)
 
 			fmt.Fprintf(
 				&builder,
 				"    Subnet ID      : %s\n",
-				utils.stringValue(ni.SubnetId),
+				utils.Stringvalue(ni.SubnetId),
 			)
 
 			if len(ni.PrivateIpAddresses) > 0 {
@@ -370,7 +370,7 @@ func ShowEC2Detail(
 					fmt.Fprintf(
 						&builder,
 						"      - %s\n",
-						utils.stringValue(ip.PrivateIpAddress),
+						utils.Stringvalue(ip.PrivateIpAddress),
 					)
 				}
 			}
@@ -390,7 +390,7 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"Root Device       : %s\n",
-			utils.stringValue(instance.RootDeviceName),
+			utils.Stringvalue(instance.RootDeviceName),
 		)
 	} else {
 		builder.WriteString("Root Device       : -\n")
@@ -419,7 +419,7 @@ func ShowEC2Detail(
 			fmt.Fprintf(
 				&builder,
 				"    Device Name    : %s\n",
-				utils.stringValue(device.DeviceName),
+				utils.Stringvalue(device.DeviceName),
 			)
 
 			if device.Ebs != nil {
@@ -427,13 +427,13 @@ func ShowEC2Detail(
 				fmt.Fprintf(
 					&builder,
 					"    Volume ID      : %s\n",
-					utils.stringValue(device.Ebs.VolumeId),
+					utils.Stringvalue(device.Ebs.VolumeId),
 				)
 
 				fmt.Fprintf(
 					&builder,
 					"    Delete on Term.: %t\n",
-					boolValue(device.Ebs.DeleteOnTermination),
+					utils.BoolValue(device.Ebs.DeleteOnTermination),
 				)
 
 			}
@@ -454,13 +454,13 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"Availability Zone : %s\n",
-			utils.stringValue(instance.Placement.AvailabilityZone),
+			utils.Stringvalue(instance.Placement.AvailabilityZone),
 		)
 
 		fmt.Fprintf(
 			&builder,
 			"AZ ID             : %s\n",
-			utils.stringValue(instance.Placement.AvailabilityZoneId),
+			utils.Stringvalue(instance.Placement.AvailabilityZoneId),
 		)
 
 		fmt.Fprintf(
@@ -472,20 +472,20 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"Host ID           : %s\n",
-			utils.stringValue(instance.Placement.HostId),
+			utils.Stringvalue(instance.Placement.HostId),
 		)
 
 		fmt.Fprintf(
 			&builder,
 			"Partition Number  : %d\n",
-			int32Value(instance.Placement.PartitionNumber),
+			utils.Int32value(instance.Placement.PartitionNumber),
 		)
 
 		if instance.Placement.GroupName != nil {
 			fmt.Fprintf(
 				&builder,
 				"Placement Group   : %s\n",
-				utils.stringValue(instance.Placement.GroupName),
+				utils.Stringvalue(instance.Placement.GroupName),
 			)
 		}
 	}
@@ -523,7 +523,7 @@ func ShowEC2Detail(
 	fmt.Fprintf(
 		&builder,
 		"Spot Request ID   : %s\n",
-		utils.stringValue(instance.SpotInstanceRequestId),
+		utils.Stringvalue(instance.SpotInstanceRequestId),
 	)
 
 	// ==================================================
@@ -552,7 +552,7 @@ func ShowEC2Detail(
 		fmt.Fprintf(
 			&builder,
 			"Hop Limit         : %d\n",
-			int32Value(instance.MetadataOptions.HttpPutResponseHopLimit),
+			utils.Int32value(instance.MetadataOptions.HttpPutResponseHopLimit),
 		)
 	}
 
@@ -574,8 +574,8 @@ func ShowEC2Detail(
 			fmt.Fprintf(
 				&builder,
 				"  %-25s : %s\n",
-				utils.stringValue(tag.Key),
-				utils.stringValue(tag.Value),
+				utils.Stringvalue(tag.Key),
+				utils.Stringvalue(tag.Value),
 			)
 		}
 	}
@@ -632,8 +632,8 @@ func getEC2Tag(
 
 	for _, tag := range tags {
 
-		if utils.stringValue(tag.Key) == key {
-			return utils.stringValue(tag.Value)
+		if utils.Stringvalue(tag.Key) == key {
+			return utils.Stringvalue(tag.Value)
 		}
 	}
 

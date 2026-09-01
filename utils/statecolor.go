@@ -17,21 +17,21 @@ func Getstatecolor(state string) tcell.Color {
 	}
 }
 
-func stringValue(v *string) string {
+func Stringvalue(v *string) string {
 	if v == nil {
 		return "-"
 	}
 	return *v
 }
 
-func int32Value(v *int32) int32 {
+func Int32value(v *int32) int32 {
 	if v == nil {
 		return 0
 	}
 	return *v
 }
 
-func boolValue(v *bool) bool {
+func BoolValue(v *bool) bool {
 	if v == nil {
 		return false
 	}
