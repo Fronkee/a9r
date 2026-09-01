@@ -12,6 +12,10 @@ type Ec2instance struct {
 	PublicIP  string
 }
 
+type Ec2instanceDetail struct {
+
+}
+
 type S3Bucket struct {
 	Name         string
 	CreationDate time.Time

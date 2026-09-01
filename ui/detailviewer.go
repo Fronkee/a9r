@@ -10,7 +10,9 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
-
+func ShowEC2Detail(
+	
+)
 func ShowS3Detail(
 	app *tview.Application,
 	pages *tview.Pages,
