@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -21,20 +20,26 @@ func ShowLoading(
 	loading.SetBorder(true)
 	loading.SetTitle("A9R")
 
-	loading.SetInputCapture(
-		func(event *tcell.EventKey) *tcell.EventKey {
-			return nil
-		},
-	)
+	center := tview.NewFlex().
+		SetDirection(tview.FlexColumn).
+		AddItem(nil, 0, 1, false).
+		AddItem(loading, 30, 0, false).
+		AddItem(nil, 0, 1, false)
+
+	overlay := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).
+		AddItem(center, 3, 0, false).
+		AddItem(nil, 0, 1, false)
 
 	pages.AddPage(
 		"loading",
-		loading,
+		overlay,
 		true,
 		false,
 	)
 
-	pages.SwitchToPage("loading")
+	pages.ShowPage("loading")
 
 	app.SetFocus(loading)
 }

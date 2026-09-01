@@ -16,3 +16,24 @@ func Getstatecolor(state string) tcell.Color {
 		return tcell.ColorWhite
 	}
 }
+
+func Stringvalue(v *string) string {
+	if v == nil {
+		return "-"
+	}
+	return *v
+}
+
+func Int32value(v *int32) int32 {
+	if v == nil {
+		return 0
+	}
+	return *v
+}
+
+func BoolValue(v *bool) bool {
+	if v == nil {
+		return false
+	}
+	return *v
+}

@@ -38,7 +38,7 @@ func BindTableKeys(
 			}
 
 			switch *selectedResource {
-
+			// Json Viewer For EC2
 			case "EC2":
 
 				index := row - 1
@@ -49,7 +49,12 @@ func BindTableKeys(
 				}
 
 				instance := state.EC2Instances[index]
-
+				ShowLoading(
+					app,
+					pages,
+					table,
+					instance.Name,
+				)
 				go func() {
 
 					detail := aws.GetEC2Detail(
@@ -70,7 +75,7 @@ func BindTableKeys(
 					}
 
 					app.QueueUpdateDraw(func() {
-
+						pages.RemovePage("loading")
 						ShowJSONViewer(
 							app,
 							pages,
@@ -82,7 +87,7 @@ func BindTableKeys(
 				}()
 
 				return nil
-
+			// Json Viewer For S3
 			case "S3":
 
 				index := row - 1
@@ -93,7 +98,12 @@ func BindTableKeys(
 				}
 
 				bucket := state.S3Buckets[index]
-
+				ShowLoading(
+					app,
+					pages,
+					table,
+					bucket.Name,
+				)
 				go func() {
 
 					detail := aws.GetS3BucketDetail(
@@ -111,7 +121,7 @@ func BindTableKeys(
 						bucket.CreationDate
 
 					app.QueueUpdateDraw(func() {
-
+						pages.RemovePage("loading")
 						ShowJSONViewer(
 							app,
 							pages,
@@ -126,84 +136,119 @@ func BindTableKeys(
 			}
 
 		// ==========================================
-		// ENTER - S3 DETAIL
+		// DETAIL Viewer
 		// ==========================================
 
-		case event.Key() == tcell.KeyEnter:
-
-			if *selectedResource != "S3" {
-				return nil
-			}
-
+		case event.Rune() == 'd':
 			if row <= 0 {
 				return nil
 			}
+			switch *selectedResource {
+			case "EC2":
+				index := row - 1
 
-			index := row - 1
+				if index < 0 ||
+					index >= len(state.EC2Instances) {
+					return nil
+				}
+				instance := state.EC2Instances[index]
+				ShowLoading(
+					app,
+					pages,
+					table,
+					instance.Name,
+				)
+				// ======================================
+				// BACKGROUND - Instance METADATA
+				// ======================================
+				go func() {
+					detail := aws.GetEC2Detail(
+						context.Background(),
+						*selectedProfile,
+						*selectedRegion,
+						instance.ID,
+					)
 
-			if index < 0 ||
-				index >= len(state.S3Buckets) {
+					if detail == nil {
+						app.QueueUpdateDraw(func() {
+							pages.RemovePage("loading")
+							app.SetFocus(table)
+						})
+
+						return
+					}
+
+					app.QueueUpdateDraw(func() {
+						pages.RemovePage("loading")
+						ShowEC2Detail(
+							app,
+							pages,
+							table,
+							*selectedProfile,
+							detail,
+						)
+					})
+				}()
+
 				return nil
-			}
+			case "S3":
+				index := row - 1
 
-			bucket := state.S3Buckets[index]
-
-			// ======================================
-			// SHOW LOADING IMMEDIATELY
-			// ======================================
-
-			ShowLoading(
-				app,
-				pages,
-				table,
-				bucket.Name,
-			)
-
-			// ======================================
-			// BACKGROUND - BUCKET METADATA
-			// ======================================
-
-			go func() {
-
-				detail := aws.GetS3BucketDetail(
-					context.Background(),
-					*selectedProfile,
-					*selectedRegion,
+				if index < 0 ||
+					index >= len(state.S3Buckets) {
+					return nil
+				}
+				bucket := state.S3Buckets[index]
+				ShowLoading(
+					app,
+					pages,
+					table,
 					bucket.Name,
 				)
+				// ======================================
+				// BACKGROUND - BUCKET METADATA
+				// ======================================
+				go func() {
 
-				if detail == nil {
+					detail := aws.GetS3BucketDetail(
+						context.Background(),
+						*selectedProfile,
+						*selectedRegion,
+						bucket.Name,
+					)
+
+					if detail == nil {
+
+						app.QueueUpdateDraw(func() {
+
+							pages.RemovePage("loading")
+							app.SetFocus(table)
+						})
+
+						return
+					}
+
+					detail.CreationDate = bucket.CreationDate
+
+					// ==================================
+					// SHOW DETAIL UI
+					// ==================================
 
 					app.QueueUpdateDraw(func() {
 
 						pages.RemovePage("loading")
-						app.SetFocus(table)
+
+						ShowS3Detail(
+							app,
+							pages,
+							table,
+							*selectedProfile,
+							detail,
+						)
 					})
 
-					return
-				}
-
-				detail.CreationDate =
-					bucket.CreationDate
-
-				// ==================================
-				// SHOW DETAIL UI
-				// ==================================
-
-				app.QueueUpdateDraw(func() {
-
-					pages.RemovePage("loading")
-
-					ShowS3Detail(
-						app,
-						pages,
-						table,
-						*selectedProfile,
-						detail,
-					)
-				})
-
-			}()
+				}()
+			}
 
 			return nil
 		}
@@ -238,10 +283,10 @@ func BindGlobalKeys(
 
 		statusBar.SetDynamicColors(true)
 
-		left := "TAB=switch | j=json | /=search | r=refresh | a=auto | q=quit"
+		left := "TAB=switch | d=detail | j=json | /=search | r=refresh | a=auto | q=quit"
 
 		if *autoRefresh {
-			left = "Auto: ON | TAB=switch | j=json | /=search | r=refresh | a=auto-off | q=quit"
+			left = "Auto: ON | TAB=switch | j=json | d=detail | /=search | r=refresh | a=auto-off | q=quit"
 		}
 
 		if searchMode {

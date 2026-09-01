@@ -10,6 +10,7 @@ func NewForm(
 	table *tview.Table,
 	profiles []string,
 	regions []string,
+	resources []string,
 	selectedProfile *string,
 	selectedRegion *string,
 	selectedResource *string,
@@ -65,23 +66,25 @@ func NewForm(
 	// RESOURCE
 	// ==================================================
 
-	resourceOptions := []string{
-		"EC2",
-		"S3",
-	}
+	// resourceOptions := []string{
+	// 	"EC2",
+	// 	"S3",
+	// }
 
 	resourceDropDown := tview.NewDropDown()
 
 	resourceDropDown.SetLabel("Resource: ")
 	resourceDropDown.SetOptions(
-		resourceOptions,
+		resources,
 		func(option string, index int) {
 			*selectedResource = option
 		},
 	)
 
 	resourceDropDown.SetCurrentOption(0)
-	*selectedResource = "EC2"
+	if len(resources) > 0 {
+		*selectedResource = resources[0]
+	}
 
 	// ==================================================
 	// STATUS

@@ -13,7 +13,7 @@ func GetS3Buckets(
 	region string,
 ) []models.S3Bucket {
 
-	return aws.GetBuckets(
+	return aws.GetS3Buckets(
 		ctx,
 		profile,
 		region,
