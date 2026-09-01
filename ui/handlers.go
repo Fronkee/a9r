@@ -156,7 +156,7 @@ func BindTableKeys(
 					app,
 					pages,
 					table,
-					instance.ID,
+					instance.Name,
 				)
 				// ======================================
 				// BACKGROUND - Instance METADATA
@@ -283,10 +283,10 @@ func BindGlobalKeys(
 
 		statusBar.SetDynamicColors(true)
 
-		left := "TAB=switch | j=json | /=search | r=refresh | a=auto | q=quit"
+		left := "TAB=switch | d=detail | j=json | /=search | r=refresh | a=auto | q=quit"
 
 		if *autoRefresh {
-			left = "Auto: ON | TAB=switch | j=json | /=search | r=refresh | a=auto-off | q=quit"
+			left = "Auto: ON | TAB=switch | j=json | d=detail | /=search | r=refresh | a=auto-off | q=quit"
 		}
 
 		if searchMode {

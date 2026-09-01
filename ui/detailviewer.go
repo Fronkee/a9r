@@ -613,7 +613,7 @@ func ShowEC2Detail(
 
 	pages.AddPage(
 		"ec2-detail",
-		text,
+		Center(100, 30, text),
 		true,
 		true,
 	)
@@ -736,9 +736,6 @@ func ShowS3Detail(
 			fmt.Sprintf("%d", len(detail.Tags)),
 		)
 
-		b.WriteString("\n")
-		b.WriteString("  ESC / q = Close\n")
-
 		text.SetText(b.String())
 	}
 
@@ -747,8 +744,7 @@ func ShowS3Detail(
 	text.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
 
-			if event.Key() == tcell.KeyEsc ||
-				event.Rune() == 'q' {
+			if event.Key() == tcell.KeyEsc {
 
 				pages.RemovePage("s3-detail")
 				app.SetFocus(table)
