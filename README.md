@@ -41,10 +41,10 @@ go run .
 [default]
 region = ap-southeast-1
 
-[profile movie-uat]
+[profile one]
 region = us-east-1
 
-[profile music-uat]
+[profile two]
 region = ap-south-1
 ```
 
