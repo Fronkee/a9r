@@ -9,6 +9,7 @@ func NewForm(
 	app *tview.Application,
 	table *tview.Table,
 	profiles []string,
+	profileRegions map[string]string,
 	regions []string,
 	resources []string,
 	selectedProfile *string,
@@ -23,6 +24,31 @@ func NewForm(
 ) {
 
 	// ==================================================
+	// PROFILE -> REGION AUTO SELECT
+	// ==================================================
+
+	var regionDropDown *tview.DropDown
+
+	syncRegion := func(profile string) {
+
+		region, found := profileRegions[profile]
+
+		if !found ||
+			region == "" ||
+			regionDropDown == nil {
+			return
+		}
+
+		for i, r := range regions {
+
+			if r == region {
+				regionDropDown.SetCurrentOption(i)
+				return
+			}
+		}
+	}
+
+	// ==================================================
 	// PROFILE
 	// ==================================================
 
@@ -33,6 +59,7 @@ func NewForm(
 		profiles,
 		func(option string, index int) {
 			*selectedProfile = option
+			syncRegion(option)
 		},
 	)
 
@@ -46,7 +73,7 @@ func NewForm(
 	// REGION
 	// ==================================================
 
-	regionDropDown := tview.NewDropDown()
+	regionDropDown = tview.NewDropDown()
 
 	regionDropDown.SetLabel("Region  : ")
 	regionDropDown.SetOptions(
@@ -60,6 +87,14 @@ func NewForm(
 
 	if len(regions) > 0 {
 		*selectedRegion = regions[0]
+	}
+
+	// ==================================================
+	// INITIAL PROFILE REGION SYNC
+	// ==================================================
+
+	if len(profiles) > 0 {
+		syncRegion(*selectedProfile)
 	}
 
 	// ==================================================

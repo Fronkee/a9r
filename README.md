@@ -11,6 +11,7 @@ A fast terminal UI for managing AWS resources.
 - Vim-style navigation
 - AWS multi profile support
 - Multi-region support
+- Auto region select from profile
 - Responsive terminal UI
 
 ## Preview
@@ -35,6 +36,20 @@ go run .
 ## AWS Config Example
 
 ~/.aws/config
+
+```ini
+[default]
+region = ap-southeast-1
+
+[profile movie-uat]
+region = us-east-1
+
+[profile music-uat]
+region = ap-south-1
+```
+
+Selecting a profile auto-selects its `region`.
+You can still change the region manually.
 
 ## Controls
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"slices"
+
 	"github.com/aungshanbo/a9r/configs"
 	"github.com/aungshanbo/a9r/models"
 	"github.com/aungshanbo/a9r/ui"
@@ -9,9 +11,18 @@ import (
 
 func main() {
 
-	profiles := configs.Loadconfig()
+	profiles, profileRegions := configs.Loadconfig()
 	regions := configs.GetRegions()
 	resources := configs.GetResources()
+
+	for _, region := range profileRegions {
+
+		if region != "" &&
+			!slices.Contains(regions, region) {
+
+			regions = append(regions, region)
+		}
+	}
 
 	app := tview.NewApplication()
 
@@ -38,6 +49,7 @@ func main() {
 		app,
 		table,
 		profiles,
+		profileRegions,
 		regions,
 		resources,
 		&selectedProfile,
